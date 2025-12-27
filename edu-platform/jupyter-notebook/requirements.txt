@@ -1,0 +1,90 @@
+# Python Packages for Educational Platform Jupyter Notebook
+# ===========================================
+
+# Core Scientific Computing
+numpy>=1.24.0
+scipy>=1.11.0
+pandas>=2.0.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.15.0
+bokeh>=3.2.0
+altair>=5.0.0
+pygal>=3.0.0
+wordcloud>=1.9.0
+
+# Math & Symbolic Computing
+sympy>=1.12
+mpmath>=1.3.0
+networkx>=3.1
+
+# Machine Learning
+scikit-learn>=1.3.0
+statsmodels>=0.14.0
+xgboost>=1.7.0
+lightgbm>=4.0.0
+
+# Deep Learning (CPU only to save RAM)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+torchaudio
+tensorflow-cpu>=2.13.0
+
+# Image Processing
+pillow>=10.0.0
+opencv-python-headless>=4.8.0
+
+# Engineering & Physics
+control>=0.9.0
+pint>=0.22
+uncertainties>=3.1.0
+
+# Optimization
+cvxpy>=1.4.0
+pulp>=2.7.0
+
+# Bioinformatics (optional - comment out if not needed)
+biopython>=1.81
+
+# Geospatial
+folium>=0.14.0
+geopandas>=0.13.0
+
+# Data Formats
+openpyxl>=3.1.0
+xlrd>=2.0.0
+python-docx>=0.8.0
+PyPDF2>=3.0.0
+xlsxwriter>=3.1.0
+
+# Web & API
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+httpx>=0.24.0
+
+# Utilities
+tqdm>=4.65.0
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# Database
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+
+# Jupyter enhancements
+ipywidgets>=8.0.0
+jupyterlab-widgets>=3.0.0
+voila>=0.5.0
+
+# Code quality (for teaching)
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.4.0
+
+# Testing
+pytest>=7.4.0
+hypothesis>=6.82.0

@@ -1,0 +1,70 @@
+# ===========================================
+# Caddy Configuration - Development
+# ===========================================
+# Uses self-signed certificates for local development
+# Access via localhost or local IP
+
+# Global options for development
+{
+    # Use internal CA for self-signed certs
+    local_certs
+    auto_https disable_redirects
+    # Enable debug logging
+    debug
+}
+
+# ===========================================
+# Moodle LMS - localhost:8080 or learn.localhost
+# ===========================================
+:80 {
+    # Route based on host header
+    @moodle host learn.localhost localhost 127.0.0.1
+    handle @moodle {
+        reverse_proxy moodle:8080 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto http
+        }
+    }
+
+    @jupyter host jupyter.localhost
+    handle @jupyter {
+        reverse_proxy jupyterhub:8000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto http
+        }
+    }
+
+    @code host code.localhost
+    handle @code {
+        reverse_proxy code-server:8080 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto http
+        }
+    }
+
+    @ai host ai.localhost
+    handle @ai {
+        reverse_proxy deepseek-proxy:8000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto http
+        }
+    }
+
+    # Default: Moodle
+    handle {
+        reverse_proxy moodle:8080 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto http
+        }
+    }
+}

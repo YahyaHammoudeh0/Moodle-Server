@@ -1,0 +1,20 @@
+# DeepSeek Proxy Dependencies
+
+# Web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# HTTP client
+httpx>=0.25.0
+
+# Rate limiting
+slowapi>=0.1.9
+
+# Security
+python-multipart>=0.0.6
+
+# Configuration
+pydantic-settings>=2.0.0
+
+# Logging
+structlog>=23.2.0

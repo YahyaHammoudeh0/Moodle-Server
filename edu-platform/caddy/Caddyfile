@@ -1,0 +1,187 @@
+# ===========================================
+# Caddy Configuration - Production
+# ===========================================
+# Automatic HTTPS via Let's Encrypt
+# Reverse proxy for all services
+
+# Global options
+{
+    email {$ADMIN_EMAIL:admin@{$DOMAIN}}
+    # Staging CA for testing (uncomment to test without rate limits)
+    # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+# ===========================================
+# Common security headers snippet
+# ===========================================
+(security_headers) {
+    header {
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+        # Remove server identification
+        -Server
+    }
+}
+
+# ===========================================
+# Compression snippet
+# ===========================================
+(compression) {
+    encode gzip zstd
+}
+
+# ===========================================
+# Moodle LMS - learn.{DOMAIN}
+# ===========================================
+learn.{$DOMAIN} {
+    import security_headers
+    import compression
+
+    # Large file uploads for Moodle
+    request_body {
+        max_size 256MB
+    }
+
+    reverse_proxy moodle:8080 {
+        # Pass original headers
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+
+        # Health check
+        health_uri /login/index.php
+        health_interval 30s
+        health_timeout 10s
+
+        # Timeouts for long operations
+        transport http {
+            response_header_timeout 300s
+            read_timeout 300s
+            write_timeout 300s
+        }
+    }
+
+    # Logging
+    log {
+        output file /data/logs/moodle.log {
+            roll_size 10MB
+            roll_keep 5
+        }
+    }
+}
+
+# ===========================================
+# JupyterHub - jupyter.{DOMAIN}
+# ===========================================
+jupyter.{$DOMAIN} {
+    import security_headers
+    import compression
+
+    # Allow iframe for JupyterHub
+    header X-Frame-Options "ALLOWALL"
+
+    reverse_proxy jupyterhub:8000 {
+        # Pass original headers
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+
+        # WebSocket support (critical for Jupyter)
+        transport http {
+            response_header_timeout 300s
+        }
+    }
+
+    # Logging
+    log {
+        output file /data/logs/jupyter.log {
+            roll_size 10MB
+            roll_keep 5
+        }
+    }
+}
+
+# ===========================================
+# Code Server - code.{DOMAIN}
+# ===========================================
+code.{$DOMAIN} {
+    import security_headers
+    import compression
+
+    # Allow iframe for Code Server
+    header X-Frame-Options "ALLOWALL"
+
+    reverse_proxy code-server:8080 {
+        # Pass original headers
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up Upgrade {http.request.header.Upgrade}
+        header_up Connection {http.request.header.Connection}
+
+        # WebSocket support (critical for VS Code)
+        transport http {
+            response_header_timeout 300s
+        }
+    }
+
+    # Logging
+    log {
+        output file /data/logs/code-server.log {
+            roll_size 10MB
+            roll_keep 5
+        }
+    }
+}
+
+# ===========================================
+# DeepSeek Proxy - ai.{DOMAIN}
+# ===========================================
+ai.{$DOMAIN} {
+    import security_headers
+    import compression
+
+    # Rate limiting is handled at application level in deepseek-proxy
+    # (Caddy rate_limit requires custom build with caddy-ratelimit plugin)
+
+    reverse_proxy deepseek-proxy:8000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+
+        # Longer timeout for AI responses
+        transport http {
+            response_header_timeout 120s
+            read_timeout 120s
+            write_timeout 120s
+        }
+    }
+
+    # Logging
+    log {
+        output file /data/logs/deepseek.log {
+            roll_size 10MB
+            roll_keep 5
+        }
+    }
+}
+
+# ===========================================
+# Root domain redirect
+# ===========================================
+{$DOMAIN} {
+    redir https://learn.{$DOMAIN}{uri} permanent
+}
+
+www.{$DOMAIN} {
+    redir https://learn.{$DOMAIN}{uri} permanent
+}

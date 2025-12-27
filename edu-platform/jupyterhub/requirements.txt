@@ -1,0 +1,16 @@
+# JupyterHub dependencies
+
+# Docker spawner for user containers
+dockerspawner>=12.1.0
+
+# Native authenticator (username/password)
+jupyterhub-nativeauthenticator>=1.2.0
+
+# Idle culler - shuts down inactive notebooks
+jupyterhub-idle-culler>=1.2.1
+
+# PostgreSQL support
+psycopg2-binary>=2.9.9
+
+# SQLAlchemy for database
+SQLAlchemy>=2.0.0

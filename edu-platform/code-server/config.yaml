@@ -1,0 +1,42 @@
+# Code Server Configuration
+# VS Code in the browser for educational platform
+
+bind-addr: 0.0.0.0:8080
+auth: password
+# Password is set via environment variable PASSWORD
+
+# Certificate settings (handled by Caddy reverse proxy)
+cert: false
+
+# Disable telemetry
+disable-telemetry: true
+
+# Disable update check
+disable-update-check: true
+
+# App name shown in browser tab
+app-name: "Educational Platform - Code Editor"
+
+# Welcome text
+welcome-text: |
+  Welcome to the Educational Platform Code Editor!
+
+  This is a full VS Code environment in your browser.
+
+  Pre-installed extensions:
+  - Python (ms-python.python)
+  - Pylance (ms-python.vscode-pylance)
+  - Jupyter (ms-toolsai.jupyter)
+  - LaTeX Workshop (james-yu.latex-workshop)
+  - C/C++ (ms-vscode.cpptools)
+  - GitLens (eamodio.gitlens)
+
+  Your files are saved in /home/coder/workspace
+
+  Happy coding!
+
+# User data directory
+user-data-dir: /home/coder/.local/share/code-server
+
+# Extensions directory
+extensions-dir: /home/coder/.local/share/code-server/extensions

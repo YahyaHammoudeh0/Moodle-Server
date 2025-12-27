@@ -1,0 +1,79 @@
+# Development Override Configuration
+# This file is automatically loaded by docker compose alongside docker-compose.yml
+# Use for local development only - NOT for production!
+#
+# To use production config only: docker compose -f docker-compose.yml up -d
+
+services:
+  # ===========================================
+  # CADDY - Development with self-signed certs
+  # ===========================================
+  caddy:
+    volumes:
+      - ./caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+    ports:
+      - "8080:80"
+      - "8443:443"
+
+  # ===========================================
+  # MOODLE - Development settings
+  # ===========================================
+  moodle:
+    environment:
+      # Faster startup for development
+      MOODLE_SKIP_BOOTSTRAP: "no"
+      # Debug mode
+      BITNAMI_DEBUG: "true"
+    # Expose directly for debugging
+    ports:
+      - "8081:8080"
+
+  # ===========================================
+  # MAXIMA - Development with debug logging
+  # ===========================================
+  maxima:
+    environment:
+      MAXIMA_POOL_SIZE: 1  # Single process for development
+      DEBUG: "true"
+    ports:
+      - "8765:8080"
+
+  # ===========================================
+  # JUPYTERHUB - Development mode
+  # ===========================================
+  jupyterhub:
+    environment:
+      JUPYTERHUB_DEBUG: "true"
+    ports:
+      - "8000:8000"
+
+  # ===========================================
+  # CODE-SERVER - Development access
+  # ===========================================
+  code-server:
+    ports:
+      - "8443:8080"
+
+  # ===========================================
+  # DEEPSEEK PROXY - Development mode
+  # ===========================================
+  deepseek-proxy:
+    environment:
+      DEBUG: "true"
+      LOG_LEVEL: "debug"
+    ports:
+      - "8001:8000"
+
+  # ===========================================
+  # POSTGRESQL - Development access
+  # ===========================================
+  postgres:
+    ports:
+      - "5432:5432"
+
+  # ===========================================
+  # REDIS - Development access
+  # ===========================================
+  redis:
+    ports:
+      - "6379:6379"
