@@ -58,13 +58,9 @@
         }
     }
 
-    # Default: Moodle
+    # Default: Landing page
     handle {
-        reverse_proxy moodle:8080 {
-            header_up Host {host}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
-            header_up X-Forwarded-Proto http
-        }
+        root * /srv/landing
+        file_server
     }
 }

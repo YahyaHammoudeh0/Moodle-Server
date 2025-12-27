@@ -176,12 +176,25 @@ ai.{$DOMAIN} {
 }
 
 # ===========================================
-# Root domain redirect
+# Landing Portal - {DOMAIN}
 # ===========================================
 {$DOMAIN} {
-    redir https://learn.{$DOMAIN}{uri} permanent
+    import security_headers
+    import compression
+
+    # Serve static landing page
+    root * /srv/landing
+    file_server
+
+    # Logging
+    log {
+        output file /data/logs/landing.log {
+            roll_size 10MB
+            roll_keep 5
+        }
+    }
 }
 
 www.{$DOMAIN} {
-    redir https://learn.{$DOMAIN}{uri} permanent
+    redir https://{$DOMAIN}{uri} permanent
 }

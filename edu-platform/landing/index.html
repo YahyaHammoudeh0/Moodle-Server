@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Platform</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            width: 100%;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .service-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .service-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .service-card .arrow {
+            display: inline-block;
+            margin-top: 1rem;
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .service-card .arrow::after {
+            content: ' →';
+        }
+
+        /* Service-specific colors */
+        .moodle .service-icon { background: #f97316; color: white; }
+        .jupyter .service-icon { background: #f59e0b; color: white; }
+        .code .service-icon { background: #0ea5e9; color: white; }
+        .ai .service-icon { background: #8b5cf6; color: white; }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .info-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .info-section h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-section ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .info-section li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .info-section li::before {
+            content: '✓';
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 640px) {
+            header h1 {
+                font-size: 1.75rem;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Educational Platform</h1>
+        <p>Your gateway to learning, coding, and discovery</p>
+    </header>
+
+    <main>
+        <h2 class="section-title">Services</h2>
+        <div class="services-grid">
+            <a href="https://learn.{{DOMAIN}}" class="service-card moodle">
+                <div class="service-icon">📚</div>
+                <h3>Moodle LMS</h3>
+                <p>Access courses, assignments, quizzes, and STACK assessments for mathematics and science.</p>
+                <span class="arrow">Open Moodle</span>
+            </a>
+
+            <a href="https://jupyter.{{DOMAIN}}" class="service-card jupyter">
+                <div class="service-icon">🔬</div>
+                <h3>JupyterHub</h3>
+                <p>Interactive notebooks with Python, R, Julia, and Octave for data science and scientific computing.</p>
+                <span class="arrow">Launch Jupyter</span>
+            </a>
+
+            <a href="https://code.{{DOMAIN}}" class="service-card code">
+                <div class="service-icon">💻</div>
+                <h3>Code Editor</h3>
+                <p>VS Code in your browser with Python, C/C++, LaTeX, and more. No installation required.</p>
+                <span class="arrow">Open Editor</span>
+            </a>
+
+            <a href="https://ai.{{DOMAIN}}/docs" class="service-card ai">
+                <div class="service-icon">🤖</div>
+                <h3>AI Assistant</h3>
+                <p>Get help with coding, math problems, and learning concepts using AI-powered assistance.</p>
+                <span class="arrow">Access AI</span>
+            </a>
+        </div>
+
+        <div class="info-section">
+            <h2>Available Tools & Languages</h2>
+            <ul>
+                <li>Python with NumPy, Pandas, TensorFlow</li>
+                <li>R with Tidyverse, ggplot2, Shiny</li>
+                <li>Julia for scientific computing</li>
+                <li>GNU Octave (MATLAB compatible)</li>
+                <li>LaTeX for document preparation</li>
+                <li>Git version control</li>
+                <li>STACK for math assessments</li>
+                <li>Maxima computer algebra system</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        <div class="status">
+            <span class="status-dot"></span>
+            All systems operational
+        </div>
+        <p style="margin-top: 0.5rem;">Educational Platform • Self-Hosted</p>
+    </footer>
+
+    <script>
+        // Replace {{DOMAIN}} placeholders with actual domain
+        // This will be handled by Caddy's templates or can be done client-side
+        const domain = window.location.hostname.replace(/^www\./, '').replace(/^[^.]+\./, '') || window.location.hostname;
+        document.body.innerHTML = document.body.innerHTML.replace(/\{\{DOMAIN\}\}/g, domain);
+    </script>
+</body>
+</html>
