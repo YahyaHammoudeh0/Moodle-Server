@@ -1,8 +1,7 @@
 # ===========================================
 # Caddy Configuration - Development
 # ===========================================
-# Uses self-signed certificates for local development
-# Access via localhost or local IP
+# Dashboard at root, services via subdomains or direct ports
 
 # Global options for development
 {
@@ -16,12 +15,12 @@
 }
 
 # ===========================================
-# Moodle LMS - localhost:8080 or learn.localhost
+# Main Dashboard - localhost:8080
 # ===========================================
 :80 {
-    # Route based on host header
-    @moodle host learn.localhost localhost 127.0.0.1
-    handle @moodle {
+    # Subdomain routing (requires /etc/hosts entries)
+    @learn host learn.localhost
+    handle @learn {
         reverse_proxy moodle:8080 {
             header_up Host {host}
             header_up X-Real-IP {remote_host}
@@ -60,7 +59,7 @@
         }
     }
 
-    # Default: Landing page
+    # Default: Service Dashboard
     handle {
         root * /srv/landing
         file_server
