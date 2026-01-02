@@ -18,10 +18,19 @@ Includes **Moodle LMS**, **JupyterHub** (Python/R/Julia), **VS Code** in browser
 
 **Let the wizard configure based on your RAM:**
 
+**Linux/macOS:**
 ```bash
 git clone <your-repo-url>
 cd Moodle-Server
-./wizard.sh  # Interactive configuration
+./wizard.sh
+```
+
+**Windows:**
+```cmd
+git clone <your-repo-url>
+cd Moodle-Server
+wizard.bat
+REM Or use PowerShell: powershell -ExecutionPolicy Bypass -File wizard.ps1
 ```
 
 Choose from:

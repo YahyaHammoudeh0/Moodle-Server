@@ -10,10 +10,25 @@ The Educational Platform now includes an **interactive setup wizard** that helps
 
 ### First Time Setup
 
+**Linux/macOS:**
 ```bash
 git clone <your-repo>
 cd Moodle-Server
 ./wizard.sh
+```
+
+**Windows (Command Prompt):**
+```cmd
+git clone <your-repo>
+cd Moodle-Server
+wizard.bat
+```
+
+**Windows (PowerShell - Recommended):**
+```powershell
+git clone <your-repo>
+cd Moodle-Server
+powershell -ExecutionPolicy Bypass -File wizard.ps1
 ```
 
 The wizard will:
