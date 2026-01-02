@@ -145,7 +145,9 @@ cat > CREDENTIALS.txt << EOF
   🔐 YOUR LOGIN CREDENTIALS
 ════════════════════════════════════════════════════
 
-📚 MOODLE        http://localhost:8080
+🏠 DASHBOARD     http://localhost:8080
+
+📚 MOODLE        http://localhost:8081
    User: admin
    Pass: $MOODLE_PASS
 

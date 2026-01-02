@@ -20,6 +20,11 @@ services:
   # ===========================================
   moodle:
     environment:
+      # URL for local development (no subdomain, direct port access)
+      MOODLE_HOST: localhost:8081
+      # Disable reverse proxy for local development
+      MOODLE_REVERSEPROXY: "no"
+      MOODLE_SSLPROXY: "no"
       # Faster startup for development
       MOODLE_SKIP_BOOTSTRAP: "no"
       # Debug mode

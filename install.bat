@@ -138,7 +138,9 @@ REM Create credentials file
     echo   YOUR LOGIN CREDENTIALS
     echo ════════════════════════════════════════════════════
     echo.
-    echo MOODLE        http://localhost:8080
+    echo DASHBOARD     http://localhost:8080
+    echo.
+    echo MOODLE        http://localhost:8081
     echo    User: admin
     echo    Pass: !MOODLE_PASS!
     echo.
