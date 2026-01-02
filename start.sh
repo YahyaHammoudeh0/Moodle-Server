@@ -96,6 +96,29 @@ generate_password() {
 }
 
 # ===========================================
+# Check if Wizard Should Run
+# ===========================================
+check_wizard() {
+    ENV_FILE="$PLATFORM_DIR/.env"
+    WIZARD_CONFIG="$PLATFORM_DIR/.wizard-config"
+
+    # If neither .env nor wizard config exists, suggest running wizard
+    if [[ ! -f "$ENV_FILE" ]] && [[ ! -f "$WIZARD_CONFIG" ]]; then
+        echo ""
+        log_info "First time setup detected!"
+        echo ""
+        read -p "$(echo -e ${BOLD}Run setup wizard to configure services? [Y/n]:${NC} )" -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            cd "$(dirname "${BASH_SOURCE[0]}")"
+            ./wizard.sh
+            # Wizard will call start.sh, so exit here
+            exit 0
+        fi
+    fi
+}
+
+# ===========================================
 # Auto-Generate .env
 # ===========================================
 generate_env() {
@@ -216,17 +239,29 @@ start_services() {
 
     cd "$PLATFORM_DIR"
 
+    # Determine which compose files to use
+    COMPOSE_FILES="-f docker-compose.yml -f docker-compose.override.yml"
+
+    # Add optional services if profiles are set
+    if [[ -f ".env" ]] && grep -q "COMPOSE_PROFILES" ".env"; then
+        PROFILES=$(grep "^COMPOSE_PROFILES=" ".env" | cut -d= -f2 | tr -d '"' | tr -d "'")
+        if [[ -n "$PROFILES" ]] && [[ "$PROFILES" != "" ]]; then
+            COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.optional.yml"
+            log_info "Optional services enabled: $PROFILES"
+        fi
+    fi
+
     # Pull latest images
     log_info "Pulling Docker images (this may take a few minutes on first run)..."
-    docker compose pull --quiet
+    docker compose $COMPOSE_FILES pull --quiet
 
     # Build custom images
     log_info "Building custom images..."
-    docker compose build --quiet
+    docker compose $COMPOSE_FILES build --quiet
 
     # Start all services
     log_info "Starting all containers..."
-    docker compose up -d
+    docker compose $COMPOSE_FILES up -d
 
     log_success "All services started!"
 }
@@ -318,6 +353,8 @@ main() {
     check_docker
     echo ""
 
+    check_wizard
+
     generate_env
     echo ""
 
@@ -331,6 +368,12 @@ main() {
 
     log_info "Platform is ready to use! 🚀"
     echo ""
+
+    # Show SERVICES.md if it exists (created by wizard)
+    if [[ -f "$PLATFORM_DIR/SERVICES.md" ]]; then
+        echo -e "${CYAN}Tip:${NC} See ${BOLD}edu-platform/SERVICES.md${NC} for all enabled services"
+        echo ""
+    fi
 }
 
 # Run main function

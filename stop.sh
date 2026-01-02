@@ -17,14 +17,28 @@ PLATFORM_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/edu-platform" && pwd)"
 if [[ "$1" == "logs" ]]; then
     echo -e "${BLUE}ℹ${NC} Showing logs (Ctrl+C to exit)..."
     cd "$PLATFORM_DIR"
-    docker compose logs -f
+
+    # Include optional compose file if it exists
+    COMPOSE_FILES="-f docker-compose.yml -f docker-compose.override.yml"
+    if [[ -f "docker-compose.optional.yml" ]]; then
+        COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.optional.yml"
+    fi
+
+    docker compose $COMPOSE_FILES logs -f
     exit 0
 fi
 
 echo -e "${BLUE}ℹ${NC} Stopping Educational Platform..."
 
 cd "$PLATFORM_DIR"
-docker compose down
+
+# Stop all services including optional ones
+COMPOSE_FILES="-f docker-compose.yml -f docker-compose.override.yml"
+if [[ -f "docker-compose.optional.yml" ]]; then
+    COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.optional.yml"
+fi
+
+docker compose $COMPOSE_FILES down
 
 echo -e "${GREEN}✓${NC} Platform stopped successfully"
 echo ""

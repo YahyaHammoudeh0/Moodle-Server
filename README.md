@@ -2,39 +2,52 @@
 
 > **A complete educational stack that just works** - Clone, run, and start learning!
 
-Includes **Moodle LMS**, **JupyterHub** (Python/R/Julia), **VS Code** in browser, and **AI Assistant** - all fully containerized and ready to run on any system with Docker.
+Includes **Moodle LMS**, **JupyterHub** (Python/R/Julia), **VS Code** in browser, **AI Assistant**, and more - all fully containerized and ready to run on any system with Docker.
+
+**🆕 NEW:** Interactive setup wizard with RAM-based profiles! Choose from **MINIMAL** (4GB), **STANDARD** (8GB), **ENHANCED** (16GB), or **FULL** (32GB) configurations. See **[Setup Wizard Guide](SETUP_WIZARD.md)**.
 
 ---
 
-## ⚡ Quick Start (Clone and Run!)
+## ⚡ Quick Start
 
 ### Prerequisites
 - **Docker** installed ([Get Docker](https://www.docker.com/products/docker-desktop))
 - That's it! No other dependencies needed.
 
-### Linux/macOS
+### 🧙 Option 1: Setup Wizard (Recommended)
+
+**Let the wizard configure based on your RAM:**
 
 ```bash
 git clone <your-repo-url>
 cd Moodle-Server
-./start.sh
+./wizard.sh  # Interactive configuration
 ```
 
-### Windows
+Choose from:
+- **MINIMAL** (4GB) - Core Moodle
+- **STANDARD** (8GB) - + JupyterHub, Code Server, AI
+- **ENHANCED** (16GB) - + RStudio, SageMath, Monitoring
+- **FULL** (32GB) - + Gitea, n8n, Portainer
+- **CUSTOM** - Pick individual services
 
-```cmd
+📖 **[Full Wizard Guide →](SETUP_WIZARD.md)**
+
+### ⚡ Option 2: Standard Setup
+
+**Skip wizard, use defaults:**
+
+```bash
 git clone <your-repo-url>
 cd Moodle-Server
-start.bat
+./start.sh    # Linux/macOS
+start.bat     # Windows
 ```
-
-**That's literally it!** 🚀
 
 The platform will:
 1. ✅ Auto-generate secure passwords
-2. ✅ Pull and build all Docker images
-3. ✅ Start all services
-4. ✅ Give you access URLs and credentials
+2. ✅ Start core services
+3. ✅ Give you access URLs and credentials
 
 ---
 
