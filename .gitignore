@@ -1,0 +1,33 @@
+# Environment files (contain secrets!)
+.env
+*.env
+!.env.example
+
+# Credentials
+CREDENTIALS.txt
+**/CREDENTIALS.txt
+
+# Docker volumes (data)
+**/data/
+**/volumes/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
