@@ -1,0 +1,6 @@
+# Educational Platform Wizard Configuration
+# Generated: Fedora Test
+PROFILE=enhanced
+TOTAL_RAM=15
+TOTAL_CORES=16
+ENABLED_SERVICES=maxima jupyterhub code-server deepseek-proxy rstudio sagemath grafana prometheus

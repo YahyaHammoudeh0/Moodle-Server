@@ -1,0 +1,108 @@
+#!/bin/bash
+# Educational Platform Launcher
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLATFORM_DIR="$SCRIPT_DIR/edu-platform"
+cd "$PLATFORM_DIR"
+
+# Compose files
+COMPOSE_CMD="docker compose -f docker-compose.yml -f docker-compose.override.yml"
+if [[ -f "docker-compose.optional.yml" ]]; then
+    source .env 2>/dev/null
+    if [[ -n "$COMPOSE_PROFILES" ]]; then
+        COMPOSE_CMD="$COMPOSE_CMD -f docker-compose.optional.yml"
+    fi
+fi
+
+show_menu() {
+    clear
+    echo ""
+    echo "╔════════════════════════════════════════╗"
+    echo "║   🎓 Educational Platform              ║"
+    echo "╠════════════════════════════════════════╣"
+    echo "║  1) ▶  Start Platform                  ║"
+    echo "║  2) ⏹  Stop Platform                   ║"
+    echo "║  3) 🔄 Restart Platform                ║"
+    echo "║  4) 📊 View Status                     ║"
+    echo "║  5) 📜 View Logs                       ║"
+    echo "║  6) 🌐 Open in Browser                 ║"
+    echo "║  7) 🔑 Show Credentials                ║"
+    echo "║  8) ❌ Exit                            ║"
+    echo "╚════════════════════════════════════════╝"
+    echo ""
+}
+
+start_platform() {
+    echo "🚀 Starting platform..."
+    $COMPOSE_CMD up -d
+    echo ""
+    echo "✓ Platform started!"
+    echo ""
+    echo "Access at: http://localhost:8080"
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+stop_platform() {
+    echo "⏹ Stopping platform..."
+    $COMPOSE_CMD down
+    echo "✓ Platform stopped!"
+    read -p "Press Enter to continue..."
+}
+
+restart_platform() {
+    echo "🔄 Restarting platform..."
+    $COMPOSE_CMD restart
+    echo "✓ Platform restarted!"
+    read -p "Press Enter to continue..."
+}
+
+show_status() {
+    echo "📊 Service Status:"
+    echo ""
+    $COMPOSE_CMD ps
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+show_logs() {
+    echo "📜 Logs (Ctrl+C to exit):"
+    $COMPOSE_CMD logs -f --tail=50
+}
+
+open_browser() {
+    if command -v xdg-open &> /dev/null; then
+        xdg-open "http://localhost:8080" 2>/dev/null &
+    elif command -v open &> /dev/null; then
+        open "http://localhost:8080"
+    else
+        echo "Open http://localhost:8080 in your browser"
+    fi
+    echo "🌐 Opening browser..."
+    sleep 1
+}
+
+show_credentials() {
+    echo ""
+    cat "$PLATFORM_DIR/CREDENTIALS.txt"
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+# Main loop
+while true; do
+    show_menu
+    read -p "Choose [1-8]: " choice
+
+    case $choice in
+        1) start_platform ;;
+        2) stop_platform ;;
+        3) restart_platform ;;
+        4) show_status ;;
+        5) show_logs ;;
+        6) open_browser ;;
+        7) show_credentials ;;
+        8) echo "Goodbye!"; exit 0 ;;
+        *) echo "Invalid choice" ;;
+    esac
+done

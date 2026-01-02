@@ -120,10 +120,15 @@ services:
   # ===========================================
   # MOODLE - Learning Management System
   # ===========================================
+  # Note: bitnami/moodle moved to legacy repo (Aug 2025)
+  # See: https://moodle.org/mod/forum/discuss.php?d=469337
   moodle:
-    image: bitnami/moodle:latest
+    image: bitnamilegacy/moodle:latest
     container_name: moodle
     restart: unless-stopped
+    # Required for SELinux-enabled systems (Fedora, RHEL, CentOS)
+    security_opt:
+      - label:disable
     environment:
       # Database configuration
       MOODLE_DATABASE_TYPE: pgsql
@@ -177,8 +182,10 @@ services:
   # ===========================================
   # MAXIMA - Computer Algebra System for STACK
   # ===========================================
+  # Using unihalle/maximapool - public image compatible with STACK
+  # Alternative to ghcr.io/maths/stack-maxima (requires GitHub auth)
   maxima:
-    image: ghcr.io/maths/stack-maxima:latest
+    image: unihalle/maximapool:latest
     container_name: maxima
     restart: unless-stopped
     environment:
@@ -186,6 +193,8 @@ services:
       MAXIMA_POOL_SIZE: ${MAXIMA_POOL_SIZE:-3}
       # Timeout for complex calculations (30 seconds)
       MAXIMA_TIMEOUT: 30000
+      # Required admin password for maximapool
+      MAXIMAPOOL_ADMIN_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - backend
     deploy:
@@ -195,7 +204,7 @@ services:
         reservations:
           memory: 512M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
       interval: 30s
       timeout: 10s
       retries: 3

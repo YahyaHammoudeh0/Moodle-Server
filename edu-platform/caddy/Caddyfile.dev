@@ -11,6 +11,8 @@
     auto_https disable_redirects
     # Enable debug logging
     debug
+    # Enable admin API for healthchecks
+    admin :2019
 }
 
 # ===========================================
