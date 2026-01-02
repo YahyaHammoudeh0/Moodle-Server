@@ -355,7 +355,52 @@ start_platform() {
         if [[ "$MODE" == "personal" ]]; then
             echo -e "Open ${CYAN}http://localhost:8080${NC} in your browser"
         fi
+
+        # Offer to install plugins
+        echo ""
+        read -p "$(echo -e ${BOLD}Install Moodle plugins including STACK math questions? [Y/n]${NC} )" -n 1 -r
+        echo ""
+        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            install_plugins
+        fi
     fi
+}
+
+# ===========================================
+# Install Moodle Plugins
+# ===========================================
+install_plugins() {
+    echo ""
+    echo -e "${BLUE}${BOLD}Installing Moodle plugins...${NC}"
+    echo -e "${DIM}This includes STACK, H5P, gamification, and more${NC}"
+    echo ""
+
+    # Wait for Moodle to be ready
+    echo -e "${YELLOW}Waiting for Moodle to start (this may take a few minutes)...${NC}"
+    local count=0
+    while ! docker exec moodle curl -sf http://localhost:8080/login/index.php > /dev/null 2>&1; do
+        sleep 10
+        count=$((count + 1))
+        echo -n "."
+        if [[ $count -gt 30 ]]; then
+            echo ""
+            echo -e "${YELLOW}Moodle is taking longer than expected. You can run plugins later:${NC}"
+            echo -e "${DIM}  ./edu-platform/scripts/setup-moodle-plugins.sh${NC}"
+            return
+        fi
+    done
+    echo ""
+
+    # Run the plugin installer
+    if [[ -x "$PLATFORM_DIR/scripts/setup-moodle-plugins.sh" ]]; then
+        "$PLATFORM_DIR/scripts/setup-moodle-plugins.sh"
+    else
+        bash "$PLATFORM_DIR/scripts/setup-moodle-plugins.sh"
+    fi
+
+    echo ""
+    echo -e "${GREEN}Plugins installed!${NC}"
+    echo -e "${DIM}STACK is configured to use Maxima for math computations and graphs${NC}"
 }
 
 # ===========================================

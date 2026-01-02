@@ -182,19 +182,17 @@ services:
   # ===========================================
   # MAXIMA - Computer Algebra System for STACK
   # ===========================================
-  # Using unihalle/maximapool - public image compatible with STACK
-  # Alternative to ghcr.io/maths/stack-maxima (requires GitHub auth)
+  # Using goemaxima - simple Maxima web service for STACK
+  # https://github.com/mathinstitut/goemaxima
   maxima:
-    image: unihalle/maximapool:latest
+    image: mathinstitut/goemaxima:2025102100-latest
     container_name: maxima
     restart: unless-stopped
     environment:
       # Pool size reduced for 8GB RAM
-      MAXIMA_POOL_SIZE: ${MAXIMA_POOL_SIZE:-3}
+      GOEMAXIMA_NUSER: ${MAXIMA_POOL_SIZE:-3}
       # Timeout for complex calculations (30 seconds)
-      MAXIMA_TIMEOUT: 30000
-      # Required admin password for maximapool
-      MAXIMAPOOL_ADMIN_PASSWORD: ${POSTGRES_PASSWORD}
+      GOEMAXIMA_QUEUE_TIMEOUT: 30s
     networks:
       - backend
     deploy:
@@ -204,7 +202,7 @@ services:
         reservations:
           memory: 512M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/goemaxima"]
       interval: 30s
       timeout: 10s
       retries: 3

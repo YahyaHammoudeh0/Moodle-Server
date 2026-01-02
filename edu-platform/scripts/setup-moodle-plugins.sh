@@ -53,8 +53,11 @@ PLUGINS=(
     # Tiles - Visual course tiles
     "format_tiles|format|https://moodle.org/plugins/download.php/32047/format_tiles_moodle44_2024101500.zip"
 
-    # STACK - Math questions with Maxima
+    # STACK - Math questions with Maxima (and required dependencies)
     "qtype_stack|question|https://moodle.org/plugins/download.php/32187/qtype_stack_moodle44_2024111100.zip"
+    "qbehaviour_adaptivemultipart|question|https://moodle.org/plugins/download.php/32188/qbehaviour_adaptivemultipart_moodle44_2024111100.zip"
+    "qbehaviour_dfexplicitvaildate|question|https://moodle.org/plugins/download.php/32189/qbehaviour_dfexplicitvaildate_moodle44_2024111100.zip"
+    "qbehaviour_dfcbmexplicitvaildate|question|https://moodle.org/plugins/download.php/32190/qbehaviour_dfcbmexplicitvaildate_moodle44_2024111100.zip"
 )
 
 echo -e "${BLUE}Installing ${#PLUGINS[@]} plugins...${NC}"
@@ -65,11 +68,24 @@ for plugin_def in "${PLUGINS[@]}"; do
 
     echo -e "${YELLOW}Installing: ${NC}$name"
 
+    # Determine installation directory based on type
+    if [[ "$type" == "question" ]]; then
+        if [[ "$name" == qtype_* ]]; then
+            install_dir="/bitnami/moodle/question/type"
+        elif [[ "$name" == qbehaviour_* ]]; then
+            install_dir="/bitnami/moodle/question/behaviour"
+        else
+            install_dir="/bitnami/moodle/question"
+        fi
+    else
+        install_dir="/bitnami/moodle/$type"
+    fi
+
     # Download plugin to temp
     docker exec "$MOODLE_CONTAINER" bash -c "
         cd /tmp
         curl -sL '$url' -o plugin.zip
-        unzip -q -o plugin.zip -d /bitnami/moodle/$type/
+        unzip -q -o plugin.zip -d $install_dir/
         rm plugin.zip
     " 2>/dev/null || echo -e "${RED}  Failed to download $name${NC}"
 
@@ -81,10 +97,16 @@ echo ""
 echo -e "${BLUE}Upgrading Moodle database...${NC}"
 docker exec "$MOODLE_CONTAINER" php /bitnami/moodle/admin/cli/upgrade.php --non-interactive 2>/dev/null || true
 
-# Configure STACK to use Maxima
+# Configure STACK to use Maxima (goemaxima)
 echo -e "${BLUE}Configuring STACK for Maxima...${NC}"
-docker exec "$MOODLE_CONTAINER" php /bitnami/moodle/admin/cli/cfg.php --name=qtype_stack_platform --set=server 2>/dev/null || true
-docker exec "$MOODLE_CONTAINER" php /bitnami/moodle/admin/cli/cfg.php --name=qtype_stack_maximacommand --set="http://maxima:8080/maxima" 2>/dev/null || true
+docker exec "$MOODLE_CONTAINER" php /bitnami/moodle/admin/cli/cfg.php --component=qtype_stack --name=platform --set=server 2>/dev/null || true
+docker exec "$MOODLE_CONTAINER" php /bitnami/moodle/admin/cli/cfg.php --component=qtype_stack --name=maximacommand --set="http://maxima:8080/goemaxima" 2>/dev/null || true
+docker exec "$MOODLE_CONTAINER" php /bitnami/moodle/admin/cli/cfg.php --component=qtype_stack --name=maximaversion --set="5.47.0" 2>/dev/null || true
+docker exec "$MOODLE_CONTAINER" php /bitnami/moodle/admin/cli/cfg.php --component=qtype_stack --name=plotcommand --set="gnuplot" 2>/dev/null || true
+
+# Clear caches
+echo -e "${BLUE}Clearing Moodle caches...${NC}"
+docker exec "$MOODLE_CONTAINER" php /bitnami/moodle/admin/cli/purge_caches.php 2>/dev/null || true
 
 echo ""
 echo -e "${GREEN}============================================${NC}"
@@ -98,3 +120,4 @@ for plugin_def in "${PLUGINS[@]}"; do
 done
 echo ""
 echo -e "${YELLOW}Note: Visit Site Administration > Notifications to complete setup${NC}"
+echo -e "${YELLOW}STACK: Site Admin > Plugins > Question types > STACK > Healthcheck${NC}"

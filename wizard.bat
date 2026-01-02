@@ -301,6 +301,46 @@ if /i not "!start_now!"=="n" (
         echo Open http://localhost:8080 in your browser
         start http://localhost:8080
     )
+
+    echo.
+    set /p install_plugins="Install Moodle plugins including STACK math questions? [Y/n] "
+    if /i not "!install_plugins!"=="n" (
+        echo.
+        echo Installing Moodle plugins...
+        echo This includes STACK, H5P, gamification, and more
+        echo.
+        echo Waiting for Moodle to start...
+
+        REM Wait for Moodle to be ready
+        :WAIT_MOODLE
+        docker exec moodle curl -sf http://localhost:8080/login/index.php >nul 2>&1
+        if errorlevel 1 (
+            echo|set /p=.
+            timeout /t 10 /nobreak >nul
+            goto WAIT_MOODLE
+        )
+        echo.
+        echo Moodle is ready!
+
+        REM Install plugins
+        echo Installing plugins...
+        docker exec moodle bash -c "cd /tmp && curl -sL 'https://moodle.org/plugins/download.php/32187/qtype_stack_moodle44_2024111100.zip' -o plugin.zip && unzip -q -o plugin.zip -d /bitnami/moodle/question/type/ && rm plugin.zip" 2>nul
+        docker exec moodle bash -c "cd /tmp && curl -sL 'https://moodle.org/plugins/download.php/32188/qbehaviour_adaptivemultipart_moodle44_2024111100.zip' -o plugin.zip && unzip -q -o plugin.zip -d /bitnami/moodle/question/behaviour/ && rm plugin.zip" 2>nul
+        docker exec moodle bash -c "cd /tmp && curl -sL 'https://moodle.org/plugins/download.php/32189/qbehaviour_dfexplicitvaildate_moodle44_2024111100.zip' -o plugin.zip && unzip -q -o plugin.zip -d /bitnami/moodle/question/behaviour/ && rm plugin.zip" 2>nul
+        docker exec moodle bash -c "cd /tmp && curl -sL 'https://moodle.org/plugins/download.php/32190/qbehaviour_dfcbmexplicitvaildate_moodle44_2024111100.zip' -o plugin.zip && unzip -q -o plugin.zip -d /bitnami/moodle/question/behaviour/ && rm plugin.zip" 2>nul
+        docker exec moodle php /bitnami/moodle/admin/cli/upgrade.php --non-interactive 2>nul
+
+        REM Configure STACK for Maxima
+        docker exec moodle php /bitnami/moodle/admin/cli/cfg.php --component=qtype_stack --name=platform --set=server 2>nul
+        docker exec moodle php /bitnami/moodle/admin/cli/cfg.php --component=qtype_stack --name=maximacommand --set="http://maxima:8080/goemaxima" 2>nul
+        docker exec moodle php /bitnami/moodle/admin/cli/cfg.php --component=qtype_stack --name=maximaversion --set="5.47.0" 2>nul
+        docker exec moodle php /bitnami/moodle/admin/cli/cfg.php --component=qtype_stack --name=plotcommand --set="gnuplot" 2>nul
+        docker exec moodle php /bitnami/moodle/admin/cli/purge_caches.php 2>nul
+
+        echo.
+        echo Plugins installed!
+        echo STACK is configured to use Maxima for math computations and graphs
+    )
 )
 
 echo.
