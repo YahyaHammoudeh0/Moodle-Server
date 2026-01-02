@@ -280,31 +280,30 @@ services:
       retries: 3
 
   # ===========================================
-  # DEEPSEEK PROXY - AI API Gateway
+  # OLLAMA - Local AI for Moodle Integration
   # ===========================================
-  deepseek-proxy:
-    build:
-      context: ./deepseek-proxy
-      dockerfile: Dockerfile
-    container_name: deepseek-proxy
+  # Provides OpenAI-compatible API for Moodle's AI subsystem
+  # Configure in Moodle: Site Admin > AI > AI Providers > Ollama
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
     restart: unless-stopped
-    environment:
-      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
-      PROXY_API_KEY: ${DEEPSEEK_PROXY_API_KEY}
-      RATE_LIMIT_PER_MINUTE: 10
+    volumes:
+      - ollama_data:/root/.ollama
     networks:
       - backend
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 4G
         reservations:
-          memory: 64M
+          memory: 2G
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 60s
 
 # ===========================================
 # NETWORKS
@@ -340,3 +339,6 @@ volumes:
 
   # Code Server
   code_server_data:
+
+  # Ollama AI
+  ollama_data:

@@ -1,0 +1,84 @@
+# ===========================================
+# Personal Mode - Docker Compose Override
+# ===========================================
+# No passwords, instant access for self-learning
+#
+# Usage (core only):
+#   docker compose -f docker-compose.yml -f docker-compose.personal.yml up -d
+#
+# Usage (with optional services):
+#   docker compose -f docker-compose.yml -f docker-compose.personal.yml -f docker-compose.optional.yml up -d
+# ===========================================
+
+services:
+  # ===========================================
+  # CADDY - Local development
+  # ===========================================
+  caddy:
+    volumes:
+      - ./caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+    ports:
+      - "8080:80"
+      - "8443:443"
+
+  # ===========================================
+  # MOODLE - Local access, no SSL proxy
+  # ===========================================
+  moodle:
+    environment:
+      MOODLE_HOST: localhost:8081
+      MOODLE_REVERSEPROXY: "no"
+      MOODLE_SSLPROXY: "no"
+      BITNAMI_DEBUG: "true"
+    ports:
+      - "8081:8080"
+
+  # ===========================================
+  # MAXIMA - Single instance for dev
+  # ===========================================
+  maxima:
+    environment:
+      MAXIMA_POOL_SIZE: 1
+    ports:
+      - "8765:8080"
+
+  # ===========================================
+  # JUPYTERHUB - No authentication (auto-login)
+  # ===========================================
+  jupyterhub:
+    environment:
+      JUPYTERHUB_AUTH_MODE: dummy
+      JUPYTERHUB_DEBUG: "true"
+    ports:
+      - "8000:8000"
+
+  # ===========================================
+  # CODE-SERVER - No password required
+  # ===========================================
+  code-server:
+    environment:
+      PASSWORD: ""
+    command: ["--auth", "none", "--bind-addr", "0.0.0.0:8080"]
+    ports:
+      - "8844:8080"
+
+  # ===========================================
+  # OLLAMA - Local AI
+  # ===========================================
+  ollama:
+    ports:
+      - "11434:11434"
+
+  # ===========================================
+  # DATABASE - Exposed for debugging
+  # ===========================================
+  postgres:
+    ports:
+      - "5432:5432"
+
+  # ===========================================
+  # REDIS - Exposed for debugging
+  # ===========================================
+  redis:
+    ports:
+      - "6379:6379"

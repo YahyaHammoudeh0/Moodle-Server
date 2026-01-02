@@ -1,0 +1,57 @@
+# ===========================================
+# School/Institution Mode - Docker Compose Override
+# ===========================================
+# Full authentication with SSL and SSO
+#
+# Usage (core only):
+#   docker compose -f docker-compose.yml -f docker-compose.school.yml up -d
+#
+# Usage (with optional services):
+#   docker compose -f docker-compose.yml -f docker-compose.school.yml -f docker-compose.optional.yml up -d
+# ===========================================
+
+services:
+  # ===========================================
+  # CADDY - Production with Let's Encrypt
+  # ===========================================
+  caddy:
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    environment:
+      - DOMAIN=${DOMAIN}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@${DOMAIN}}
+
+  # ===========================================
+  # MOODLE - Production settings
+  # ===========================================
+  moodle:
+    environment:
+      MOODLE_HOST: learn.${DOMAIN}
+      MOODLE_REVERSEPROXY: "yes"
+      MOODLE_SSLPROXY: "yes"
+      # OAuth2 providers
+      MOODLE_OAUTH_GOOGLE_ENABLED: ${OAUTH_GOOGLE_ENABLED:-false}
+      MOODLE_OAUTH_MICROSOFT_ENABLED: ${OAUTH_MICROSOFT_ENABLED:-false}
+      # SMTP
+      MOODLE_SMTP_HOST: ${SMTP_HOST:-}
+      MOODLE_SMTP_PORT: ${SMTP_PORT:-587}
+      MOODLE_SMTP_USER: ${SMTP_USER:-}
+      MOODLE_SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+
+  # ===========================================
+  # JUPYTERHUB - OAuth Authentication
+  # ===========================================
+  jupyterhub:
+    environment:
+      JUPYTERHUB_AUTH_MODE: oauth
+      JUPYTERHUB_URL: https://jupyter.${DOMAIN}
+      MOODLE_URL: https://learn.${DOMAIN}
+      OAUTH_CLIENT_ID: jupyterhub
+      OAUTH_CLIENT_SECRET: ${JUPYTERHUB_OAUTH_SECRET:-}
+
+  # ===========================================
+  # CODE-SERVER - Password protected
+  # ===========================================
+  code-server:
+    environment:
+      PASSWORD: ${CODE_SERVER_PASSWORD}

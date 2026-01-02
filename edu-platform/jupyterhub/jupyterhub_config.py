@@ -2,7 +2,7 @@
 JupyterHub Configuration
 ========================
 Multi-user Jupyter notebook server with Docker spawner
-Target: 50 concurrent users on 8GB RAM
+Supports both Personal (no-auth) and School (SSO) modes
 """
 
 import os
@@ -32,27 +32,53 @@ db_pass = os.environ.get('POSTGRES_PASSWORD', '')
 c.JupyterHub.db_url = f'postgresql://{db_user}:{db_pass}@{db_host}:5432/{db_name}'
 
 # ===========================================
-# Authentication - Native Authenticator
+# Authentication Mode Selection
 # ===========================================
-from nativeauthenticator import NativeAuthenticator
+AUTH_MODE = os.environ.get('JUPYTERHUB_AUTH_MODE', 'native').lower()
 
-c.JupyterHub.authenticator_class = NativeAuthenticator
+if AUTH_MODE == 'dummy' or AUTH_MODE == 'none':
+    # Personal Mode - No authentication required
+    from jupyterhub.auth import DummyAuthenticator
+    c.JupyterHub.authenticator_class = DummyAuthenticator
+    c.DummyAuthenticator.password = None  # No password needed
 
-# Admin user from environment
-admin_user = os.environ.get('JUPYTERHUB_ADMIN', 'admin')
-c.Authenticator.admin_users = {admin_user}
+    # Auto-login as default user
+    default_user = os.environ.get('JUPYTERHUB_ADMIN', 'learner')
+    c.Authenticator.admin_users = {default_user}
+    c.Authenticator.allowed_users = {default_user}
 
-# Allow anyone to sign up (admin must approve)
-c.NativeAuthenticator.open_signup = True
+elif AUTH_MODE == 'oauth' or AUTH_MODE == 'moodle':
+    # School Mode - OAuth against Moodle
+    try:
+        from oauthenticator.generic import GenericOAuthenticator
+        c.JupyterHub.authenticator_class = GenericOAuthenticator
 
-# Require admin approval for new users
-c.NativeAuthenticator.ask_email_on_signup = True
+        moodle_url = os.environ.get('MOODLE_URL', 'http://moodle:8080')
+        c.GenericOAuthenticator.oauth_callback_url = f"{os.environ.get('JUPYTERHUB_URL', 'http://localhost:8000')}/hub/oauth_callback"
+        c.GenericOAuthenticator.client_id = os.environ.get('OAUTH_CLIENT_ID', 'jupyterhub')
+        c.GenericOAuthenticator.client_secret = os.environ.get('OAUTH_CLIENT_SECRET', '')
+        c.GenericOAuthenticator.authorize_url = f"{moodle_url}/local/oauth/authorize.php"
+        c.GenericOAuthenticator.token_url = f"{moodle_url}/local/oauth/token.php"
+        c.GenericOAuthenticator.userdata_url = f"{moodle_url}/local/oauth/userinfo.php"
+        c.GenericOAuthenticator.username_claim = 'username'
+        c.GenericOAuthenticator.login_service = 'Moodle'
 
-# Minimum password length
-c.NativeAuthenticator.minimum_password_length = 8
+    except ImportError:
+        # Fallback to native if oauth not installed
+        AUTH_MODE = 'native'
 
-# Allow admins to create users
-c.NativeAuthenticator.enable_signup = True
+if AUTH_MODE == 'native':
+    # Default - Native Authenticator with signup
+    from nativeauthenticator import NativeAuthenticator
+    c.JupyterHub.authenticator_class = NativeAuthenticator
+
+    admin_user = os.environ.get('JUPYTERHUB_ADMIN', 'admin')
+    c.Authenticator.admin_users = {admin_user}
+
+    c.NativeAuthenticator.open_signup = True
+    c.NativeAuthenticator.ask_email_on_signup = True
+    c.NativeAuthenticator.minimum_password_length = 8
+    c.NativeAuthenticator.enable_signup = True
 
 # ===========================================
 # Spawner - DockerSpawner
@@ -77,51 +103,43 @@ c.DockerSpawner.start_timeout = 120
 c.DockerSpawner.http_timeout = 60
 
 # ===========================================
-# Resource Limits (Critical for 8GB RAM)
+# Resource Limits
 # ===========================================
 memory_limit = os.environ.get('JUPYTER_MEMORY_LIMIT', '1G')
 cpu_limit = float(os.environ.get('JUPYTER_CPU_LIMIT', '0.5'))
 
 c.DockerSpawner.mem_limit = memory_limit
 c.DockerSpawner.cpu_limit = cpu_limit
-
-# Memory guarantee (minimum)
 c.DockerSpawner.mem_guarantee = '256M'
 
 # ===========================================
 # Persistent Storage
 # ===========================================
-# Mount user home directories
 c.DockerSpawner.volumes = {
     'jupyter-user-{username}': '/home/jovyan/work',
     'jupyter-shared': {'bind': '/home/jovyan/shared', 'mode': 'ro'},
 }
 
-# Notebook directory inside container
 c.DockerSpawner.notebook_dir = '/home/jovyan'
 
 # ===========================================
-# Concurrent Spawn Limit
+# Concurrency Limits
 # ===========================================
-# Limit concurrent spawns to prevent memory exhaustion
 c.JupyterHub.concurrent_spawn_limit = 10
-
-# Active server limit per user
 c.JupyterHub.active_server_limit = 1
 
 # ===========================================
-# Idle Culler - Shut down inactive notebooks
+# Idle Culler
 # ===========================================
-# Cull idle notebooks after 30 minutes
 c.JupyterHub.services = [
     {
         'name': 'idle-culler',
         'command': [
             sys.executable,
             '-m', 'jupyterhub_idle_culler',
-            '--timeout=1800',  # 30 minutes
-            '--cull-every=300',  # Check every 5 minutes
-            '--max-age=0',  # No maximum age
+            '--timeout=1800',
+            '--cull-every=300',
+            '--max-age=0',
             '--concurrency=5',
         ],
         'admin': True,
@@ -131,10 +149,7 @@ c.JupyterHub.services = [
 # ===========================================
 # Security
 # ===========================================
-# Generate a secure cookie secret
 c.JupyterHub.cookie_secret_file = '/data/jupyterhub_cookie_secret'
-
-# Proxy auth token
 c.ConfigurableHTTPProxy.auth_token = os.environ.get(
     'CONFIGPROXY_AUTH_TOKEN',
     os.urandom(32).hex()
@@ -144,43 +159,19 @@ c.ConfigurableHTTPProxy.auth_token = os.environ.get(
 # Logging
 # ===========================================
 c.JupyterHub.log_level = 'INFO'
-
-# Debug mode from environment
 if os.environ.get('JUPYTERHUB_DEBUG', 'false').lower() == 'true':
     c.JupyterHub.log_level = 'DEBUG'
 
 # ===========================================
-# Custom Templates (Optional)
-# ===========================================
-# Uncomment to use custom templates
-# c.JupyterHub.template_paths = ['/srv/jupyterhub/templates']
-
-# ===========================================
-# Post-Spawn Hooks (Optional)
+# Hooks
 # ===========================================
 def pre_spawn_hook(spawner):
-    """Hook called before spawning a user server."""
     username = spawner.user.name
     spawner.environment['NB_USER'] = username
-    # Add any custom environment variables
     spawner.environment['JUPYTER_ENABLE_LAB'] = 'yes'
 
 c.DockerSpawner.pre_spawn_hook = pre_spawn_hook
 
-# ===========================================
-# Admin Configuration
-# ===========================================
-# Allow admin to access user servers
+# Admin access
 c.JupyterHub.admin_access = True
-
-# Shutdown on logout
 c.JupyterHub.shutdown_on_logout = False
-
-# ===========================================
-# URL Configuration
-# ===========================================
-# Base URL (if behind reverse proxy with path prefix)
-# c.JupyterHub.base_url = '/jupyter/'
-
-# Trust X-Forwarded headers from reverse proxy
-c.JupyterHub.trust_user_provided_tokens = False
