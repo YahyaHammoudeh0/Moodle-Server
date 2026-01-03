@@ -133,6 +133,24 @@ Install plugins after Moodle starts:
 ./edu-platform/scripts/setup-moodle-plugins.sh
 ```
 
+### Sample STACK Courses
+
+The repo includes sample courses to test STACK math questions:
+
+| File | Description |
+|------|-------------|
+| `STACK-demo.mbz` | Full demo with hundreds of STACK questions |
+| `STACK-syntax-quiz.mbz` | Tutorial for learning STACK syntax |
+| `HELM-questions.mbz` | Engineering math questions |
+
+**To import a sample course:**
+1. Log into Moodle as admin
+2. Go to **Site Administration > Courses > Restore**
+3. Upload a `.mbz` file from `edu-platform/moodle/sample-courses/`
+4. Follow the restore wizard
+
+These courses include graph plotting, randomized variables, and step-by-step feedback.
+
 ---
 
 ## AI Integration
